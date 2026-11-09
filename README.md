@@ -6,7 +6,7 @@ The idea came from something I kept running into across assignments. An agent co
 
 During HW7, the inherited project contained conflicting requirements. I asked the agent to record those conflicts and follow the acceptance criteria:
 
-> 它的这个不一致你把它记录下来。你就它怎么验收你就怎么写。
+“Keep a record of those inconsistencies, and implement the project according to its acceptance criteria.”
 
 That instruction appears in my [HW7 prompt log](https://github.com/RyanZhou123232/chaos-lab-phase2/blob/main/prompt_log.md). A similar request appears in my [Naevia log](https://github.com/RyanZhou123232/Naevia/blob/main/prompt_log.md), where I asked whether the specification actually satisfied the handoff requirements.
 
