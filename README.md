@@ -1,117 +1,42 @@
-# Homework 8 — Agent Toolkit
+This project gives my coding agent two reusable tools: a skill for checking work against requirements, and an MCP tool for working with my existing application-tracking spreadsheet.
 
-This toolkit pairs a report-only acceptance checker with one local MCP tool,
-`application_tracker`. The skill reviews work against criteria, names conflicts
-and cites evidence. The tool queries an existing Excel tracker and can update
-only status/notes, with current-version checks and exact backups.
+The idea came from something I kept running into across assignments. An agent could produce a working result, but I still had to explain what counted as finished, which requirements mattered, and what evidence I wanted to see. Meanwhile, useful information often lived outside the conversation, in files the agent needed a reliable way to query.
 
-## Motivation from earlier work
+### Why I built it
 
-The owner's [HW7 Phase 2 Prompt 2](https://github.com/RyanZhou123232/chaos-lab-phase2/blob/main/prompt_log.md)
-says:
+During HW7, the inherited project contained conflicting requirements. I asked the agent to record those conflicts and follow the acceptance criteria:
 
-> 它的这个不一致你把它记录下来。
-> 你就它怎么验收你就怎么写。
+> 它的这个不一致你把它记录下来。你就它怎么验收你就怎么写。
 
-[Naevia prompt 7](https://github.com/RyanZhou123232/Naevia/blob/main/prompt_log.md)
-repeats the emphasis on checking an explicit standard:
+That instruction appears in my [HW7 prompt log](https://github.com/RyanZhou123232/chaos-lab-phase2/blob/main/prompt_log.md). A similar request appears in my [Naevia log](https://github.com/RyanZhou123232/Naevia/blob/main/prompt_log.md), where I asked whether the specification actually satisfied the handoff requirements.
 
-> 这个要求你看看现在的spec满不满足
+The checker turns that recurring guidance into a reusable procedure. It reads the requirements, checks each criterion, and reports what is supported, missing, or still unverified. It also identifies conflicts and cites the relevant evidence. It reviews without fixing, so I can inspect its findings before deciding what to change.
 
-These owner prompts motivated conflict handling and evidence-based review.
-They are not the inherited HW7 Phase 1 author's prompts.
+The MCP tool handles a different need: structured access to existing information. In HW6, I asked to see exactly which records the retrieval pipeline returned. For HW8, I applied that same emphasis on traceable data to my application spreadsheet. The tool reads the workbook directly, so the agent can answer questions using recorded information instead of relying on conversation history.
 
-The [HW6 actual-pipeline walkthrough](https://github.com/RyanZhou123232/vector-memory/blob/main/prompt_log.md)
-asks to inspect exactly which structured records were returned:
+### When to use it
 
-> 每个检索句我们的这个 database 具体返回了哪四十条 line
+The checker is useful after an agent implements a feature, when taking over someone else’s project, or before submitting an assignment. It works best when there is a clear specification to review against. Running it in a fresh session also gives the reviewer a chance to inspect the work without inheriting the doing agent’s assumptions.
 
-The application workbook is a different existing source selected during HW8.
-The MCP adapter exposes its rows/filters/versions rather than reconstructing
-records from chat. This is evidence for structured access, not a claim that an
-application-specific MCP was requested in HW6. Not every HW3–HW7 log was available.
+The application tracker is useful for questions such as which applications match a company or role, or which records have a particular status. It can also update status and notes when a real change needs to be recorded. Updates require a current workbook version and create a backup. The tool maintains records; it does not submit applications or infer hiring outcomes.
 
-## Install
+The two components can work together: an agent queries the spreadsheet and produces a summary, then a separate checker compares that summary with the task requirements and returned evidence.
 
-Python 3.10+; server/client/test suite use only the standard library:
+### What was tested
 
-```powershell
-python -m venv --without-pip .venv
-.venv/Scripts/python.exe -B -m unittest discover -s mcp -v
-```
+Two real application-review tasks were completed through the MCP client and checked in separate fresh-context sessions. The server’s eight automated tests passed, and updates were verified on a disposable copy of the real workbook.
 
-Copy `skills/acceptance-check/` into `.agents/skills/acceptance-check/` in the
-project you want to review. The existing `.agents/skills/hw8-skill-ping/` is a
-visible loading probe. Confirm discovery in your own client; folder placement
-alone proves no loading.
+Independent review also found a bug where updating an empty cell could remove neighboring content. That failure led to a regression test, a code fix, and stronger preservation rules in the checker.
 
-For native Codex MCP registration, merge this into the existing
-`~/.codex/config.toml`, preserving other settings. All `C:/YOUR_...` paths are
-placeholders to replace on your machine:
+The recorded demonstrations use an explicit command-line MCP client invoked by Codex Work. Native Codex registration and automatic skill loading remain unconfirmed.
 
-```toml
-[mcp_servers.application_tracker]
-command = 'C:/YOUR_PROJECT/.venv/Scripts/python.exe'
-args = ['C:/YOUR_PROJECT/mcp/server.py']
-[mcp_servers.application_tracker.env]
-APPLICATION_TRACKER_PATH = 'C:/YOUR_DATA/applications.xlsx'
-APPLICATION_TRACKER_SHEET = 'Sheet1'
-```
+Installation instructions are in [SETUP.md](mcp/SETUP.md). [DEMONSTRATION.md](DEMONSTRATION.md) records the two runs, and [ITERATION.md](ITERATION.md) explains the failure and fix. Public examples omit private application details.
 
-A separate VS Code Copilot example is in `.vscode/mcp.json`.
-[mcp/SETUP.md](mcp/SETUP.md) documents the workbook contract and explicit client.
+### Sources and AI assistance
 
-## Confirmed client path
+The checker started from the course’s *spec-check* example, with added rules for conflicting requirements, verification limits, and preservation of unrelated content.
 
-Native Codex performed a local server handshake/discovery, but native model
-startup failed in the network-restricted execution environment. The working
-demonstrations used Codex Work with an explicit JSON-configured stdio CLI client.
-It is not native Codex MCP registration.
-
-Copy `mcp/client-config.example.json` to a private local config and replace its
-placeholder paths. Configure `skills_directories` for metadata discovery:
-
-```powershell
-python mcp/client.py --config PRIVATE_CONFIG.json skills
-python mcp/client.py --config PRIVATE_CONFIG.json skill acceptance-check
-python mcp/client.py --config PRIVATE_CONFIG.json list
-'{"action":"query","company":"Example Co","limit":100}' | python mcp/client.py --config PRIVATE_CONFIG.json call application_tracker
-```
-
-The Example Co query is illustrative; it is not a real demonstration result.
-The agent discovers the real catalog, selects call arguments and uses returned
-records. A fresh independent checker then reviews each result.
-
-## Verification
-
-| Check | Observed result |
-| --- | --- |
-| Server suite | Eight tests pass, including neighboring-cell byte preservation |
-| Real-workbook copy | Actual MCP query/update/requery, exact backup and independent readback pass; original unchanged |
-| Two real tasks | Explicit CLI MCP calls followed by separate fresh-context checker reviews |
-| Custom-client skill discovery | Fresh agent selected the ping from metadata and returned its visible marker |
-| Native automatic skill loading / VS Code UI | Unconfirmed |
-
-[DEMONSTRATION.md](DEMONSTRATION.md) contains redacted real-run evidence;
-[ITERATION.md](ITERATION.md) describes a genuine false-pass checker review and
-the subsequently discovered data-preservation defect. Private records, local
-configuration and full personal transcripts are not published.
-
-Filters are case-insensitive substrings combined with AND. Resolve the intended
-company/job before updating. Notes replace notes. Test writes on copies; the
-cooperative lock does not coordinate unrelated writers. Excel is the only data store.
-
-## Sources and AI assistance
-
-The checker adapts the course's [spec-check example](https://www.cs.cmu.edu/~113/hw8.html),
-adding precedence, compound criteria, verification limits, scratch-output rules
-and direct evidence for preservation claims. Protocol references:
-[stdio](https://modelcontextprotocol.io/specification/2025-06-18/basic/transports),
-[initialization](https://modelcontextprotocol.io/specification/2025-06-18/basic/lifecycle),
-[tools](https://modelcontextprotocol.io/specification/2025-06-18/server/tools).
-Native configuration references: [Codex skills](https://developers.openai.com/codex/skills)
-and [Codex MCP](https://developers.openai.com/codex/mcp).
-The tools-only protocol subset is implemented directly after SDK installation
+AI helped implement the tools, develop tests, troubleshoot failures, and run independent reviews. This reference README is also AI-assisted.
 was blocked; broad client certification is not claimed.
 
 AI assisted with code, tests, troubleshooting, these drafts and independent
