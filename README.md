@@ -1,8 +1,5 @@
 # Homework 8 — Agent Toolkit
 
-> AI-assisted draft requested by the owner. Independently student-written prose
-> and the owner's personal assessment remain pending.
-
 This toolkit pairs a report-only acceptance checker with one local MCP tool,
 `application_tracker`. The skill reviews work against criteria, names conflicts
 and cites evidence. The tool queries an existing Excel tracker and can update
