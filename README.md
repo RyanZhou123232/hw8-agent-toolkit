@@ -36,8 +36,7 @@ Installation instructions are in [SETUP.md](mcp/SETUP.md). [DEMONSTRATION.md](DE
 
 The checker started from the course’s *spec-check* example, with added rules for conflicting requirements, verification limits, and preservation of unrelated content.
 
-AI helped implement the tools, develop tests, troubleshoot failures, and run independent reviews. This reference README is also AI-assisted.
-was blocked; broad client certification is not claimed.
+AI helped implement the tools, develop tests, troubleshoot failures, and run independent reviews.
 
 AI assisted with code, tests, troubleshooting, these drafts and independent
 reviews. Reviewers started without doing-agent conversation or expected answers;
