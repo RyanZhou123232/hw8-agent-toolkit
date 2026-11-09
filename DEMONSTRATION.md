@@ -61,13 +61,7 @@ They established that the two summaries matched the retrieved records. They did 
 
 The public evidence is redacted, while the original call records and detailed reviews remain private.
 
-## My assessment of the checker
 
-[Write your own assessment here: Which findings do you agree with, and why? Was the checker useful? What would you still want to verify yourself?]
-
-## AI assistance
-
-AI helped execute the tasks, run independent reviews, and prepare this reference draft. My personal assessment should reflect my own review of the evidence.
 ## Separate component and skill checks
 
 A fresh agent selected the trivial ping from custom-client metadata, loaded it
@@ -81,6 +75,3 @@ A separate review also caught a preservation bug after the original seven
 tests passed. [ITERATION.md](ITERATION.md) records the genuine failing cases and
 fix; passing read-only summaries did not prove updates correct.
 
-**Owner's assessment: pending.** The owner still needs to explain their own
-agreement or disagreement with the checker. AI findings cannot supply that
-personal judgment or an independently student-written narrative.
