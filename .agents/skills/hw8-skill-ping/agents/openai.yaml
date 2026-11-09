@@ -1,0 +1,6 @@
+interface:
+  display_name: "HW8 Skill Ping - Loading Test"
+  short_description: "Visible smoke test for HW8 skill discovery"
+  default_prompt: "Use $hw8-skill-ping to perform the HW8 skill-loading smoke test."
+policy:
+  allow_implicit_invocation: true

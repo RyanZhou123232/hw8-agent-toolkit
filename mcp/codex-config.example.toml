@@ -1,0 +1,9 @@
+# Merge into the client's existing config, preserving unrelated settings.
+# All C:/YOUR_... paths are machine-specific placeholders.
+[mcp_servers.application_tracker]
+command = 'C:/YOUR_PROJECT/.venv/Scripts/python.exe'
+args = ['C:/YOUR_PROJECT/mcp/server.py']
+
+[mcp_servers.application_tracker.env]
+APPLICATION_TRACKER_PATH = 'C:/YOUR_DATA/applications.xlsx'
+APPLICATION_TRACKER_SHEET = 'Sheet1'

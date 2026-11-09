@@ -1,0 +1,28 @@
+test_excel_and_mcp_locks (test_tracker.TrackerTests.test_excel_and_mcp_locks) ... ok
+
+test_query_filters_duplicates_empty_results_and_limit (test_tracker.TrackerTests.test_query_filters_duplicates_empty_results_and_limit) ... ok
+
+test_rejections_and_noop_leave_file_unchanged (test_tracker.TrackerTests.test_rejections_and_noop_leave_file_unchanged) ... ok
+
+test_self_closing_targets_preserve_following_cells (test_tracker.TrackerTests.test_self_closing_targets_preserve_following_cells) ... ok
+
+test_sparse_and_self_closing_cells (test_tracker.TrackerTests.test_sparse_and_self_closing_cells) ... ok
+
+test_stdio_real_subprocess_handshake_query_update_errors (test_tracker.TrackerTests.test_stdio_real_subprocess_handshake_query_update_errors) ... ok
+
+test_update_roundtrip_backup_and_preserve_other_parts (test_tracker.TrackerTests.test_update_roundtrip_backup_and_preserve_other_parts) ... ok
+
+test_wrong_schema_and_accounts_workbook_rejected (test_tracker.TrackerTests.test_wrong_schema_and_accounts_workbook_rejected) ... ok
+
+
+
+----------------------------------------------------------------------
+
+Ran 8 tests in 0.557s
+
+
+
+OK
+
+
+Exit code: 0

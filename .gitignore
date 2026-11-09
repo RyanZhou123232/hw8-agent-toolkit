@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.local-tests/
+*.xlsx
+*.xlsx.*
+.env
+.env.*
+!.env.example
+.application-tracker-backups/
+.codex/
+evidence/*.stderr.txt
+Homework8-review.zip

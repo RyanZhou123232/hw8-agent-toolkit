@@ -1,0 +1,9 @@
+{
+  "command": "C:/YOUR_PROJECT/.venv/Scripts/python.exe",
+  "args": ["C:/YOUR_PROJECT/mcp/server.py"],
+  "skills_directories": ["C:/YOUR_PROJECT/skills", "C:/YOUR_PROJECT/.agents/skills"],
+  "env": {
+    "APPLICATION_TRACKER_PATH": "C:/YOUR_DATA/applications.xlsx",
+    "APPLICATION_TRACKER_SHEET": "Sheet1"
+  }
+}
