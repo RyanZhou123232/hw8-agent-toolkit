@@ -1,70 +1,73 @@
 # Demonstration
 
-> AI-assisted evidence draft. Independently student-written wording and the
-> owner's personal assessment remain pending.
+I tested the toolkit on two tasks involving my existing application-tracking spreadsheet. The goal was to check whether an agent could retrieve real records, produce an accurate summary, and have that summary reviewed independently.
 
-## Actual method
+The doing agent used Codex Work with an explicit command-line MCP client. It discovered the server’s tool catalog and called `application_tracker` through the actual stdio server. Native Codex integration was not confirmed.
 
-The doing agent was Codex Work using `mcp/client.py`, an explicit configured
-stdio client. It inspected the server's actual catalog, chose two queries on
-the owner's actual workbook and produced summaries from the results. This is
-not native Codex MCP registration or a browser WebMCP call.
+Each result went to a separate checker session with a fresh context. The reviewer received the task requirements, returned data, and relevant source files, without the doing agent’s conversation or an expected verdict.
 
-Two separate fresh-context agents each reviewed one task using the checker,
-task criteria, saved calls and relevant source. They did not receive the doing
-conversation, expected verdicts or the other run. Both independently repeated
-their read-only query and compared original-workbook hashes. No different-model
-claim is made.
+Private application details are omitted below. Redaction markers represent removed values, not the arguments originally sent.
 
-Private argument values, returned records, row IDs, dates, file paths and source
-fingerprints have been removed from the public fragments below. Redaction
-markers are not literal arguments sent to the server. The private originals
-are retained locally; the public count/truncation fields and review outcomes
-are unchanged.
+## Run 1: Applications to one organization
 
-## Run 1 — Organization application summary
+The first task was to summarize applications to a particular organization.
 
-Task: summarize one organization's applications while excluding another company
-that coincidentally matches its name as a substring.
-
-Actual wire fragment with private values redacted:
+The agent called:
 
 ```json
-{"method":"tools/call","params":{"name":"application_tracker","arguments":{"action":"query","company":"[REDACTED]","limit":100}}}
+{
+  "name": "application_tracker",
+  "arguments": {
+    "action": "query",
+    "company": "[REDACTED]",
+    "limit": 100
+  }
+}
 ```
 
-The response had `isError:false`, `total:3`, `truncated:false`. Two records
-belonged to the intended organization; the third was a different company and was
-excluded from the summary count. The doing agent preserved original fields
-privately and described statuses as tracker records, not new employer decisions.
+The query returned three matches with `truncated: false`. Two belonged to the intended organization. The third belonged to another company whose name happened to contain the search substring.
 
-Fresh reviewer outcome: all six task criteria MET, no priority gaps. It compared
-the exact reported fields against the original response, repeated the real
-query and independently confirmed unchanged before/after source hashes. It
-also passed the seven then-existing synthetic tests.
+The agent excluded that third record from the organization’s application count. It also described the statuses as information recorded in the spreadsheet, without treating them as confirmation of new interviews or employer decisions.
 
-## Run 2 — Pending data-role review
+The fresh checker accepted all six task criteria. It compared the summary with the returned records, repeated the query, and independently confirmed that the original workbook’s hash had not changed.
 
-Task: identify records satisfying both a role-title substring and a recorded
-status substring, preserving source spelling and limiting the scope claim.
+## Run 2: Applications matching a role and status
+
+The second task was to find applications matching both a role-title substring and a recorded status.
 
 ```json
-{"method":"tools/call","params":{"name":"application_tracker","arguments":{"action":"query","title":"[REDACTED]","status_filter":"[REDACTED]","limit":100}}}
+{
+  "name": "application_tracker",
+  "arguments": {
+    "action": "query",
+    "title": "[REDACTED]",
+    "status_filter": "[REDACTED]",
+    "limit": 100
+  }
+}
 ```
 
-The actual response had `isError:false`, `total:4`, `truncated:false`. The agent
-included all four matches, retained company spelling privately and explained
-that roles outside the title filter were outside this selection. It did not
-invent hiring outcomes, submit anything or contact anyone.
+This query returned four matches with `truncated: false`. The agent included all four, preserved the original company spelling, and explained that relevant roles outside the title filter were outside this particular selection.
 
-Fresh reviewer outcome: all six task criteria MET, no priority gaps. It repeated
-the query and independently corroborated the exact four records and unchanged
-source hashes. Two relevant existing synthetic tests passed.
+A different fresh-context checker accepted all six task criteria. It repeated the query, corroborated the returned records, and confirmed an unchanged workbook hash.
 
-Neither real-task call updated the original workbook. Update tests used copies.
-Historical execution was assessed from captured evidence and corroborated with
-fresh calls; reviewers did not independently witness the original timestamps.
+Neither task updated the original spreadsheet, submitted an application, or contacted anyone.
 
+## What these runs established
+
+Both runs demonstrated the same workflow: retrieve data through MCP, produce a bounded summary, and review it in a separate session.
+
+They established that the two summaries matched the retrieved records. They did not establish that every update operation was correct. A separate component review later found a preservation bug in the update path, described in [ITERATION.md](ITERATION.md).
+
+The public evidence is redacted, while the original call records and detailed reviews remain private.
+
+## My assessment of the checker
+
+[Write your own assessment here: Which findings do you agree with, and why? Was the checker useful? What would you still want to verify yourself?]
+
+## AI assistance
+
+AI helped execute the tasks, run independent reviews, and prepare this reference draft. My personal assessment should reflect my own review of the evidence.
 ## Separate component and skill checks
 
 A fresh agent selected the trivial ping from custom-client metadata, loaded it
