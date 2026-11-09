@@ -1,69 +1,57 @@
 # Iteration
 
-> AI-assisted factual draft. The owner's independently written interpretation
-> remains pending.
+The most useful failure in this project was a preservation bug that passed the original seven tests. It also exposed a weakness in how the checker decided that a requirement was met.
 
-## Failure in the checker
+## The initial false pass
 
-The baseline checker marked update/preservation criteria MET from source
-inspection. Its attempted tests did not reach assertions: the rule against any
-project-file changes led it to copy a subset of source into a different scratch
-directory, where permissions blocked fixture creation. It disclosed that limit,
-but its preservation verdicts were wrong.
+The baseline checker marked the update and preservation requirements as met after inspecting the source.
 
-The first skill revision distinguished reviewed source/data from explicitly
-allowed disposable outputs under an ignored scratch directory. It told the
-checker to inspect test side effects and run safe tests in place rather than
-copy only part of a project elsewhere. The earlier skill is preserved under
-`evidence/acceptance-check-v2-before-scratch-revision.md`.
+Its attempted tests had not reached their assertions. The skill’s instruction against changing project files led the reviewer to copy part of the project into another scratch directory, where permissions blocked test fixtures from being created.
 
-## The counterexample
+The checker disclosed that limitation, but still gave preservation a passing judgment. A later counterexample showed that judgment was wrong.
 
-The next fresh reviewer passed the old seven tests, then independently inspected
-empty-cell boundaries. It found that the matcher could consume a following cell
-when updating a self-closing target. Updating synthetic M8 deleted Q8's link;
-updating an empty L6 deleted M6's notes. The original sparse-cell test checked
-only the requested new note, missing loss of unrelated data.
+The first skill revision clarified the boundary: reviewed source files and user data must remain unchanged, while explicitly allowed disposable test fixtures can be created in an ignored scratch directory. Suitable tests should run in place after their side effects are inspected.
 
-The production pattern's greedy `[^>]*` could swallow the slash in `<c .../>`
-and continue through the next cell's closing tag. A new regression reproduced
-both failures against the old implementation before the fix.
+## What the next review found
 
-## Changes and rerun
+A fresh reviewer ran all seven existing tests successfully, then examined the empty-cell cases more closely.
 
-The matcher now uses non-greedy `[^>]*?`, ending at the first complete cell.
-The new test compares every non-target worksheet byte and unrelated archive
-member. Its literal boundary helper does not copy the production regex.
+The problem involved self-closing Excel cells. In this synthetic example, updating M8 should preserve Q8:
 
-The checker skill was revised again: bounded-edit/preservation claims require
-observed unrelated-content comparisons on relevant structural cases. Reading
-back only the edited value cannot establish MET. Its previous wording is in
-`evidence/acceptance-check-v3-before-preservation-revision.md`.
+```xml
+<c r="M8" s="0"/>
+<c r="Q8" t="inlineStr">
+  <is><t>KEEP</t></is>
+</c>
+```
+
+The matching expression could accidentally consume both cells. Updating M8 could therefore remove Q8’s link. A similar case allowed an update to an empty status cell to remove the following notes cell.
+
+The old sparse-cell test only checked whether the new note appeared. That assertion passed even when neighboring information disappeared.
+
+## What changed
+
+A new regression test reproduced both failures before the implementation was changed.
+
+The matcher’s attribute scan was changed from greedy `[^>]*` to non-greedy `[^>]*?`, so it stopped at the first complete target cell. The regression also checked all worksheet bytes outside the target and the contents of unrelated archive members.
+
+The checker skill received another revision: preservation claims now require observed comparisons of unrelated content, including relevant empty or missing structural cases. Reading back the edited value alone is insufficient.
+
+## Results after the fix
 
 | Check | Before | After |
 | --- | --- | --- |
-| Original seven tests | Pass | Pass |
-| New M8→Q8 and L6→M6 cases | Two failures | Both pass |
-| Full suite | Eight tests, two failing subcases | Eight tests pass |
+| Original seven tests | Passed | Passed |
+| Two new neighboring-cell cases | Failed | Passed |
+| Full suite | Eight tests with two failing subcases | Eight tests passed |
 | Independent preservation review | NOT MET | MET |
-| Real-workbook-copy check | Not rerun on this fix | Pass; exact backup and non-target preservation; original unchanged |
 
-The published [failing](evidence/self-closing-regression-before.txt) and
-[passing](evidence/self-closing-regression-after.txt) output uses synthetic data;
-machine paths are replaced by PROJECT_ROOT. The real-copy verifier also needed
-its old greedy comparison replaced with an independent boundary check. Its
-separate openpyxl readback used an already-installed bundled interpreter; it is
-not a new dependency of the server.
+The repaired implementation was also checked on a disposable copy of the real workbook. Query, update, and requery succeeded; the backup matched the original copy, unrelated content was preserved, and the actual source workbook remained unchanged.
 
-Finally, a new context discovered the final checker from client metadata and
-reviewed the component without prior reports: all eight criteria MET, all eight
-tests passed, plus an independent real-copy wire update/requery check. Original
-bytes were unchanged. This does not prove every future checker judgment reliable.
+A final fresh-context reviewer discovered and loaded the revised checker through the explicit client, passed all eight tests, and independently verified a real-workbook-copy update.
 
-## Client fallback
+The important change was in the evidence required for a passing result: checking that the requested value appeared was expanded to checking that neighboring information survived.
 
-Native Codex server discovery succeeded, but model startup was blocked by the
-terminal's network restriction. A background browser reached GitHub but timed
-out reaching the local test page. The working fallback was a configured stdio
-CLI adapter invoked explicitly by the agent, accurately identified in both
-demonstrations rather than labeled native Codex registration.
+## AI assistance
+
+AI helped diagnose the failure, implement the repair, develop regression tests, and conduct independent reviews. This narrative is an AI-assisted reference draft.
